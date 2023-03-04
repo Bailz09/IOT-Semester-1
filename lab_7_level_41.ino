@@ -1,5 +1,8 @@
-// C++ code
-//
+// Kevin Bailey (200544764@student.georgianc.on.ca)
+// Friday March 3 2023
+// Lab 7 Level 4 Musical Library
+
+//define the library of musical notes
 #define NOTE_B0 31
 #define NOTE_C1 33
 #define NOTE_CS1 35
@@ -89,131 +92,133 @@
 #define NOTE_CS8 4435
 #define NOTE_D8 4699
 #define NOTE_DS8 4978
-int buzzerPin=5;
-int buttonPin=2;
+//declare variables
+int buzzerPin=5;//The buzzerPin is connected to pin 5 of the Arduino.
+int buttonPin=2;//The SW1 button is connected to pin 2 of the Arduino.
+//for each song: putting the notes and duration of each note in two sepearate arrays
 int notesSBM[] = {392, 392, 440, 392, 349, 330, 294, 392, 392, 440, 392, 349, 330, 294, 392, 392, 392, 494, 392, 349, 330, 294, 262, 330, 330, 349, 294, 262, 294, 330, 294, 262, 262, 294, 330, 349, 392, 330, 294, 262, 392, 392, 440, 392, 349, 330, 294, 392, 392, 440, 392, 349, 330, 294, 392, 330, 294, 262, 294, 330, 294, 262, 262};
 int durationsSBM[] = {250, 250, 500, 500, 500, 500, 1000, 250, 250, 500, 500, 500, 500, 1000, 250, 250, 500, 500, 500, 500, 1000, 250, 250, 500, 250, 250, 500, 250, 250, 500, 500, 250, 250, 500, 250, 250, 500, 500, 250, 250, 500, 500, 500, 500, 1000, 250, 250, 500, 500, 500, 500, 1000, 250, 250, 500, 500, 500, 500, 1000, 250, 500, 500, 500, 500, 1000};
-int note;
 int notesNOK[] = {262, 294, 330, 392, 440, 494, 523, 262, 294, 330, 392, 440, 494, 523, 262, 294, 330, 392, 440, 494, 523, 262, 294, 330, 392, 440, 494, 523};
-
 int durationsNOK[] = {200, 200, 200, 200, 400, 200, 400, 200, 200, 200, 200, 400, 200, 400, 200, 200, 200, 200, 400, 200, 400, 200, 200, 200, 200, 400, 200, 400};
 int notesRRR[] = {262, 262, 294, 294, 330, 330, 294, 262, 262, 294, 294, 330, 330, 294, 262, 262, 294, 294, 330, 330, 294, 262, 294, 262, 262, 262, 294, 294, 294, 330, 330, 330, 294, 294, 262, 262, 294, 294, 330, 330, 294};
 int durationsRRR[] = {250, 250, 500, 250, 250, 500, 250, 250, 250, 250, 500, 250, 250, 500, 250, 250, 250, 250, 500, 250, 250, 500, 250, 500, 250, 250, 250, 250, 500, 250, 250, 500, 250, 250, 250, 250, 500, 250, 250, 500, 250};
-int LED[] = {8, 9, 10, 11, 12, 13};
-int count=0;
-char input;
-void setup ()
+int LED[] = {8, 9, 10, 11, 12, 13};//an array for the pins of each LED connected to the arduino
+int count=0;//a variable to keep track of which song is selected
+char input;//a char variable to collect user input.
+int note;//a variable to store the current musical note thats playing
+void setup ()//The Setup function runs once
 {
   Serial.begin(9600); //enables data to be sent to the serial monitor
-  randomSeed(analogRead(0));
-  pinMode(buzzerPin, OUTPUT);
-  pinMode(buttonPin, INPUT);
-  pinMode(LED[0], OUTPUT); //sets the red LED as an output
-  pinMode(LED[1], OUTPUT); //sets the red LED as an output
-  pinMode(LED[2], OUTPUT); //sets the red LED as an output
-  pinMode(LED[3], OUTPUT); //sets the red LED as an output
-  pinMode(LED[4], OUTPUT); //sets the red LED as an output
-  pinMode(LED[5], OUTPUT); //sets the red LED as an output  
+  randomSeed(analogRead(0));//to make our random generator for the LEDs truly random
+  pinMode(buzzerPin, OUTPUT);//setup buzzerPin as an output pin
+  pinMode(buttonPin, INPUT);//setup buttonPin as an input pin
+  pinMode(LED[0], OUTPUT); //sets the first LED in the array as an output
+  pinMode(LED[1], OUTPUT); //sets the second LED in the array as an output
+  pinMode(LED[2], OUTPUT); //sets the third LED in the array as an output
+  pinMode(LED[3], OUTPUT); //sets the fourth LED in the array as an output
+  pinMode(LED[4], OUTPUT); //sets the fifth LED in the array as an output
+  pinMode(LED[5], OUTPUT); //sets the sixth LED in the array as an output
 }
-void loop()
+void loop()//The Loop function runs forever
 {  
-  runMenu();
+  runMenu();//a command to run the runMenu() function
 }
-void NOK()
+void NOK()//a function that plays the Nokia Ringtone
 {
-  for(int i=0;i<24;i++)
+  for(int i=0;i<24;i++)//sets the parameters for the i variable
        {
-     	 int myRandom = random(0, 6);
-         note = notesNOK[i];   
-         digitalWrite(LED[myRandom], HIGH);
-         tone(buzzerPin, notesNOK[i], durationsNOK[i]);
-         delay(durationsNOK[i]*1.3);
-         digitalWrite(LED[myRandom], LOW);
-         noTone(buzzerPin);
-     if (digitalRead(buttonPin) == HIGH)
+     	 int myRandom = random(0, 6);//creates a random number 0 to 5
+         note = notesNOK[i];//stores the current note in the note variable   
+         digitalWrite(LED[myRandom], HIGH);//turn on a random LED in the array
+         tone(buzzerPin, notesNOK[i], durationsNOK[i]);//play the Nokia Ringtone by calling the notes and durations array 1 at a time respectively
+         delay(durationsNOK[i]*1.3);//delay after each note and LED flash
+         digitalWrite(LED[myRandom], LOW);//turn off the LED
+     if (digitalRead(buttonPin) == HIGH)//checks if the button has been pressed
      {
-       break;
+       break;//exit the loop
      }
        }  
 }
-void SBM()
+void SBM()//a function that plays Stand By Me
 {
-   for(int i=0;i<58;i++)
+   for(int i=0;i<58;i++)//sets the parameters for the i variable
        {
-     	 int myRandom = random(0, 6);
-         note = notesSBM[i];   
-         digitalWrite(LED[myRandom], HIGH);
-         tone(buzzerPin, notesSBM[i], durationsSBM[i]);
-         delay(durationsSBM[i]*1.3);
-         digitalWrite(LED[myRandom], LOW);
-         noTone(buzzerPin);
-     if (digitalRead(buttonPin) == HIGH)
+     	 int myRandom = random(0, 6);//creates a random number 0 to 5
+         note = notesSBM[i];//stores the current note in the note variable   
+         digitalWrite(LED[myRandom], HIGH);//turn on a random LED in the array
+         tone(buzzerPin, notesSBM[i], durationsSBM[i]);//play Stand By Me by calling the notes and durations array 1 at a time respectively
+         delay(durationsSBM[i]*1.3);//delay after each note and LED flash
+         digitalWrite(LED[myRandom], LOW);//turn off the LED
+     if (digitalRead(buttonPin) == HIGH)//checks if the button has been pressed
      {
-       break;
+       break;//exit the loop
      }
        }  
 }
-void RRR()
+void RRR()//a function that plays Row Row Row Your Boat
 {
-   for(int i = 0; i < sizeof(notesRRR)/sizeof(notesRRR[0]); i++)
+   for(int i = 0; i < sizeof(notesRRR)/sizeof(notesRRR[0]); i++)//sets the parameters for the i variable and array size(since ChatGPT didnt provide the Array size)
        {
-     	 int myRandom = random(0, 6);
-         note = notesRRR[i];
-         digitalWrite(LED[myRandom], HIGH);
-         tone(buzzerPin, notesRRR[i], durationsRRR[i]); 
-         delay(durationsRRR[i]*1.3);
-         digitalWrite(LED[myRandom], LOW);
-         noTone(buzzerPin);
-     if (digitalRead(buttonPin) == HIGH)
+     	 int myRandom = random(0, 6);//creates a random number 0 to 5
+         note = notesRRR[i];//stores the current note in the note variable
+         digitalWrite(LED[myRandom], HIGH);//turn on a random LED in the array
+         tone(buzzerPin, notesRRR[i], durationsRRR[i]);//play Row Row Row Your Boat by calling the notes and durations array 1 at a time respectively 
+         delay(durationsRRR[i]*1.3);//delay after each note and LED flash
+         digitalWrite(LED[myRandom], LOW);//turn off the LED
+     if (digitalRead(buttonPin) == HIGH)//checks if the button has been pressed
      {
-       break;
+       break;//exit the loop
      }
        }  
 }
-void runMenu()
-{
-  Menu();
-  if (count==1)
-     {
-       SBM(); 
-     }
-  else if (count==2)
-  {
-    RRR();
-  }
-  else if (count==3)
-  {
-    NOK();
-  }
-}
-void Menu()
+void runMenu()//a function that runs the main menu of the program
 {
   Serial.println("Please Choose a Song You Would Like to Play");
   Serial.println("Press 'S' for Stand By Me, 'R' for Row Row Row your boat or 'N' for the nokia Ringtone");
-  while(Serial.available()==0)
-       {
+  while(Serial.available()==0)//while nothing is entered
+       {//do nothing
        }
-        input = Serial.read();
+        input = Serial.read();//gets input from the user
         Serial.println("Hit The Button to Stop playing and choose again");
-        switch (input)
+        switch (input)//switch for the user input
              {
-          case 'S':
+          case 'S'://if user enters 'S'
               {
-                count=1;
-                break;
+                count=1;//set the count to 1
+                break;//exits the switch
               }
-          case 'R':
+          case 'R'://if user enters 'R'
               {
-                count=2;
-                break;
+                count=2;//set the count to 2
+                break;//exits the switch
               }
-          case 'N':
+          case 'N'://if user enters 'N'
               {
-                count=3;
-                break;
+                count=3;//set the count to 3
+                break;//exits the switch
               }
-             }
-                
-       
-}  
+             }      
+  if (count==1)//if the count variable equals 1, play Stand by Me
+     {
+       Serial.println("Now Playing:");
+       Serial.print("Stand By Me");
+       Serial.println("");
+       SBM(); 
+     }
+  else if (count==2)//if the count variable equals 2 play Row Row Row Your Boat
+  {
+    Serial.println("Now Playing:");
+    Serial.print("Row Row Row Your Boat");
+    Serial.println("");
+    RRR();
+  }
+  else if (count==3)//if the count variable equals 3 play the Nokia Ringtone
+  {
+    Serial.println("Now Playing:");
+    Serial.print("The Nokia Ringtone");
+    Serial.println("");
+    NOK();
+  }
+}
+
   
