@@ -7,12 +7,11 @@
 LiquidCrystal lcd(12,11,5,4,3,2);
 int buttonPin2 = 9;//button 2 is connected to pin 9 of the arduino
 int buttonPin = 6;//button 1 is connected to pin 6 of the arduino
-bool answers[]={};
+bool answers[]={};//boolean array
 String questions[]={"Cars", "Boats", "Toys", "Planes", "Music"};
 int count=-1;
-int yes;
-int no;
-
+int totalyes=0;
+int totalno=0;
 void setup()//The setup function runs once
 {
 Serial.begin(9600);//initialize the serial monitor
@@ -45,7 +44,6 @@ void car()
 	  {
         answers[0]=true;//sets the first spot in the answers array to true or 1
         lcd.clear();
-        yes++;//adds 1 to the yes variable
         count++;//adds 1 to the count variable
         lcd.setCursor(0, 1);
         lcd.print("yes");
@@ -54,9 +52,8 @@ void car()
       }
       else if (digitalRead(buttonPin2)==HIGH)
       {
-        answers[0]=false;
+        answers[0]=false;//sets the first spot in the answers array to false or 0
         lcd.clear();
-        no++;//adds 1 to the no variable
         count++;//adds 1 to the count variable
         lcd.setCursor(7, 1);
         lcd.print("no");
@@ -79,7 +76,6 @@ void boat()
         {
           answers[1]=true;//sets the 2nd spot in the answers array to true or 1
           lcd.clear();
-          yes++;//adds 1 to the yes variable
           count++;//adds 1 to the count variable       
     	  lcd.setCursor(0, 1);
     	  lcd.print("yes");
@@ -88,9 +84,8 @@ void boat()
         }
     	else if (digitalRead(buttonPin2)==HIGH)
         {
-          answers[1]=false;
+          answers[1]=false;//sets the 2nd spot in the answers array to false or 0
           lcd.clear();
-          no++;//adds 1 to the no variable
           count++;//adds 1 to the count variable  
           lcd.setCursor(7, 1);
           lcd.print("no");
@@ -113,7 +108,6 @@ void toy()
          {
            lcd.clear();
            count++;//adds 1 to the count variable  
-           yes++;//adds 1 to the yes variable
            lcd.setCursor(0, 1);
     	   lcd.print("yes");
     	   delay(500);
@@ -121,9 +115,8 @@ void toy()
          }
      	 else if (digitalRead(buttonPin2)==HIGH)
          {
-           answers[2]=false;
+           answers[2]=false;//sets the 3rd spot in the answers array to false or 0
            lcd.clear();
-           no++;//adds 1 to the no variable
            count++;//adds 1 to the count variable  
            lcd.setCursor(7, 1);
            lcd.print("no");
@@ -146,7 +139,6 @@ void plane()
            answers[3]=true;//sets the 4th spot in the answers array to true or 1
            lcd.clear();
            count++;
-           yes++;//adds 1 to the yes variable
            lcd.setCursor(0, 1);
     	   lcd.print("yes");
     	   delay(500);
@@ -154,9 +146,8 @@ void plane()
          }
      	 else if (digitalRead(buttonPin2)==HIGH)
          {
-           answers[3]=false;
+           answers[3]=false;//sets the 4th spot in the answers array to false or 0
            lcd.clear();
-           no++;//adds 1 to the no variable
            count++;//adds 1 to the count variable
            lcd.setCursor(7, 1);
            lcd.print("no");
@@ -179,7 +170,6 @@ void music()
            answers[4]=true;//sets the 5th spot in the answers array to true or 1
            lcd.clear();
            count++;//adds 1 to the count variable  
-           yes++;//adds 1 to the yes variable
            lcd.setCursor(0, 1);
     	   lcd.print("yes");
     	   delay(500);
@@ -187,9 +177,8 @@ void music()
          }
      	 else if (digitalRead(buttonPin2)==HIGH)
          {
-           answers[4]=false;
+           answers[4]=false;//sets the 5th spot in the answers array to false or 0
            lcd.clear();
-           no++;//adds 1 to the no variable
            count++;//adds 1 to the count variable  
            lcd.setCursor(7, 1);
            lcd.print("no");
@@ -204,19 +193,21 @@ void end()
     {
       for(int i=0;i<5;i++)
       {
+        totalyes = answers[0]+answers[1]+answers[2]+answers[3]+answers[4];//the sum of the answers array
+        totalno = 5 - (totalyes);//the number of falses or zeros in the array
         lcd.clear();
         lcd.setCursor(0,0);
-        lcd.print(yes);
+        lcd.print(totalyes);//displays number of questions answered yes
         lcd.setCursor(7,0);
         lcd.print("yes");
         lcd.setCursor(0,1);
-        lcd.print(no);
+        lcd.print(totalno);//displays number of question answered no
         lcd.setCursor(7,1);
         lcd.print("no");
         delay(500);
-        Serial.println(answers[i]); 
          if (digitalRead(buttonPin)==HIGH || digitalRead(buttonPin2) ==HIGH)//checks if either button has been pressed
          {
+           lcd.clear();
            count=-1;//set count back to -1, start program again
          }
       }
@@ -224,8 +215,8 @@ void end()
 }
 void start()
 {
-  	yes=0;
-  	no=0;
+  	totalyes=0;
+  	totalno=0;
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("Left button=yes");
