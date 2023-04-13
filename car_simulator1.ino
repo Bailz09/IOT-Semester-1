@@ -25,21 +25,30 @@ int maxRPM = 8000;
 int angle;
 int previousRPM;
 int carchoice = 0;
+int trackchoice = 0;
 String cars[] = { "Carrera GT", "Corvette ZR1", "GT-R NISMO" };
+String tracks[] = { "Cayuga", "Calabogie", "Shannonville" };
 float acceleration[] = { 3.5, 2.9, 2.7 };
 int topspeed[] = { 205, 208, 195 };
-int arraysize = sizeof(cars) / sizeof(cars[0]);
+int distance[] = { 1000, 1200, 800 };
+int arraysizecars = sizeof(cars) / sizeof(cars[0]);
+int arraysizetracks = sizeof(tracks) / sizeof(tracks[0]);
 bool carselected = false;
+bool trackselected = false;
 bool firstpress = true;
+bool secondpress = false;
+String weather[]={"Sunny", "Rainy", "Snowy"};
+String currentweather;
+bool trackconditions = true;
+
 unsigned long startMillis = 0;
-float distance = 1000.0; // meters
 float currentSpeed = 0.0; // mp/h
 float currentPosition = 0.0; // meters
 unsigned long startTime = 0;
 unsigned long elapsedTime = 0;
 unsigned long previousMillis = 0;
-bool raceStarted = false;
-bool raceFinished = false;
+
+
 bool startmsg = true;
 int gearspeed;
 int currentrpm;
@@ -48,17 +57,16 @@ void setup()
 {
     Serial.begin(9600);
     pinMode(rotationPin, INPUT);
-  	pinMode(buttonPin2, INPUT);
+    pinMode(buttonPin2, INPUT);
     pinMode(buttonPin, INPUT);
     rpmgauge.attach(8);
     rpmgauge.write(180);
     lcd.begin(16, 2);
-
     ring.begin();
     ring.show();
-
     pinMode(BUZZER_PIN, OUTPUT);
-
+  	randomSeed(analogRead(A1));
+    weathertoday();
 }
 void loop()
 {
@@ -66,56 +74,93 @@ void loop()
     {
         startmsg = false;
         lcd.setCursor(0, 0);
-        lcd.print("Press Button");
+        lcd.print("Press Button 1");
         lcd.setCursor(0, 1);
-        lcd.print("To Cycle Choice");
-        Serial.println("Welcome To The Cayuga 1000 meter Drag Strip!!");
-        Serial.println("Once you have selected your car the race will begin");
-        Serial.println("Use the potentiometer for throttle control");
-        Serial.println("To up shift press 4 on the numpad and then enter");
-        Serial.println("press 5 to down shift");
+        lcd.print("To Cycle Cars");
+        Serial.println("Welcome To Drag Race Ontario!!");
+       
     }
-
     while (!carselected)
     {
         if (digitalRead(buttonPin) == HIGH)
         {
             if (firstpress)
             {
-                Serial.println("Press 's' to select a car choice");
+                Serial.println("Press button 2 to select a car choice");
 
             }
             firstpress = false;
-
             lcd.clear();
-            carchoice = (carchoice + 1) % arraysize;
+            carchoice = (carchoice + 1) % arraysizecars;
             carselection();
             delay(200);
         }
-
+        if (digitalRead(buttonPin2) == HIGH)
+        {
+            carselected = true;
+            secondpress = true;
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print("Press Button 1");
+            lcd.setCursor(0, 1);
+            lcd.print("To Cycle Tracks");
+        }
+    }
+    while (!trackselected)
+    {
+        if (digitalRead(buttonPin) == HIGH)
+        {
+            if (secondpress)
+            {
+                Serial.println("Press 's' to select track and start the race!");
+            }
+            secondpress = false;
+            lcd.clear();
+            trackchoice = (trackchoice + 1) % arraysizetracks;
+            trackselection();
+            delay(200);
+        }
+      while (trackconditions)
+      {
+        trackconditions=false;
+        Serial.println("Todays Track Conditions Are: ");
+        Serial.print(currentweather);
+        Serial.println("");
+      }
         if (Serial.read() == 's')
         {
+            Serial.println("Use the potentiometer for throttle control");
+            Serial.println("To up shift press 4 on the numpad and then enter");
+            Serial.println("press 5 to down shift");
             startTime = millis();
-            carselected = true;
+            trackselected = true;
             lcd.clear();
         }
     }
-
     data = analogRead(rotationPin);
     if (gear % 2 == 0) // Even gear numbers
     {
         rpm = map(data, 0, 1023, maxRPM, minRPM);
-        engine(currentrpm);
+        engine();
     }
     else // Odd gear numbers
     {
         rpm = map(data, 0, 1023, minRPM, maxRPM);
-        engine(currentrpm);
+        engine();
 
     }
-
     gearspeed = topspeed[carchoice] / 6;
+  	  
+  if (currentweather == "Rainy")
+  {
+    gearspeed -= 2;
+  }
+  else if (currentweather == "Snowy")
+  {
+    maxRPM -=3;
+  }
     currentSpeed = map(rpm, minRPM, maxRPM, gearspeed * (gear - 1), gearspeed * gear);
+    
     updateservo();
     if (rpm != previousRPM)
     {
@@ -123,7 +168,6 @@ void loop()
         previousRPM = rpm;
         neo();
     }
-
     updateservo();
 
     if (Serial.available() > 0)
@@ -140,8 +184,6 @@ void loop()
     }
     race();
     delay(25);
-
-
 }
 
 void updateservo()
@@ -172,9 +214,19 @@ void carselection()
     lcd.setCursor(0, 1);
     lcd.print("Top Speed: ");
     lcd.print(topspeed[carchoice]);
-    lcd.print(" km/h");
+    lcd.print(" mp/h");
 }
-
+void trackselection()
+{
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Track: ");
+    lcd.print(tracks[trackchoice]);
+    lcd.setCursor(0, 1);
+    lcd.print("Distance: ");
+    lcd.print(distance[trackchoice]);
+    lcd.print("M");
+}
 void race()
 {
     unsigned long currentMillis = millis();
@@ -184,9 +236,9 @@ void race()
     float speedInMetersPerSecond = (currentSpeed * 1000.0) / (60.0 * 60.0);
     currentPosition = speedInMetersPerSecond * (elapsedTime / 1000.0);
 
-    if (currentPosition >= distance && !raceFinished)
+    if (currentPosition >= distance[trackchoice])
     {
-        raceFinished = true;
+        
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("Finished!");
@@ -201,13 +253,22 @@ void race()
         ring.show();
         carselected = false;
         currentPosition = 0;
+        currentSpeed = 0;
+        startTime = 0;
+        elapsedTime = 0;
         startMillis = millis();
         startmsg = true;
         firstpress = true;
-        raceFinished = false;
+        
         gear = 1;
         rpmgauge.write(180);
-
+        trackselected=false;
+        secondpress=true;
+        trackconditions=true;
+        weathertoday();
+        carchoice=0;
+        trackchoice=0;
+        previousMillis = 0;
     }
 }
 void neo()
@@ -247,15 +308,23 @@ void neo()
             ring.setPixelColor(i, ring.Color(0, 0, 0)); // Off
         }
     }
-
-
     ring.show();
 }
 
-void engine(int currentrpm)
+void engine()
 {
     int frequency = map(rpm, minRPM, maxRPM, 100, 1000); // Map RPM to frequency (you can adjust the range as needed)
     tone(BUZZER_PIN, frequency);
+}
+void weathertoday()
+{  
+    randomSeed(analogRead(A1));
+    int myrandom = random(0,3);
+    currentweather=weather[myrandom];
+    maxRPM = 8000;
+    gearspeed = topspeed[carchoice]/6;
+
+  
 }
 
 
